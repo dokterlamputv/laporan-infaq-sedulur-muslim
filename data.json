@@ -1,0 +1,15 @@
+{
+  "total_masuk": 15500000,
+  "total_keluar": 4200000,
+  "catatan_terakhir": "Pembaruan kas bulan Mei 2026",
+  "riwayat_masuk": [
+    {"tanggal": "2026-05-10", "keterangan": "Infaq Jumat Berkah", "jumlah": 3500000},
+    {"tanggal": "2026-05-15", "keterangan": "Hamba Allah (Transfer)", "jumlah": 5000000},
+    {"tanggal": "2026-05-22", "keterangan": "Infaq Kotak Amal Utama", "jumlah": 7000000}
+  ],
+  "riwayat_keluar": [
+    {"tanggal": "2026-05-12", "keterangan": "Pembayaran Listrik & Air", "jumlah": 1200000},
+    {"tanggal": "2026-05-18", "keterangan": "Santunan Anak Yatim", "jumlah": 2000000},
+    {"tanggal": "2026-05-24", "keterangan": "Pembelian Sapu & Alat Kebersihan", "jumlah": 1000000}
+  ]
+}
