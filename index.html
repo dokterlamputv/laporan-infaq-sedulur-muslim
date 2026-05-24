@@ -40,7 +40,6 @@
             font-size: 14px;
             margin-bottom: 10px;
         }
-        /* Style untuk Waktu Terkini */
         .waktu-terkini {
             display: inline-block;
             font-size: 13px;
@@ -132,11 +131,11 @@
         <header>
             <h1>Laporan Infaq Sedulur Muslim Jawa Timur</h1>
             <p>Manajemen data keuangan secara terbuka, aman, dan transparan</p>
-            <!-- Elemen untuk menampilkan tanggal dan jam -->
+            <!-- Menampilkan Hari, Tanggal dan Jam Berjalan -->
             <div class="waktu-terkini" id="jam-digital">Memuat waktu...</div>
         </header>
 
-        <!-- GRID SALDO UTAMA -->
+        <!-- KOTAK INFORMASI TOTAL SALDO -->
         <div class="grid-keuangan">
             <div class="kartu kartu-masuk">
                 <h3>Total Infaq Masuk</h3>
@@ -152,8 +151,9 @@
             </div>
         </div>
 
+        <!-- STATUS BOX (BULAN & TAHUN OTOMATIS BERGANTI) -->
         <div class="status-box">
-            <strong>Keterangan:</strong> <span id="txt-catatan">Memuat data...</span>
+            <strong>Keterangan:</strong> <span id="txt-catatan">Memuat status kas...</span>
         </div>
 
         <!-- TABEL RINCIAN MASUK -->
@@ -189,28 +189,22 @@
     </div>
 
     <script>
-        // 1. FUNGSI JAM DIGITAL REAL-TIME (TANGGAL, JAM, MENIT, DETIK)
+        // 1. LOGIKA JAM DIGITAL BERJALAN (WAKTU SEKARANG)
         function updateWaktu() {
             const sekarang = new Date();
-            
-            // Format Tanggal Indonesia
             const opsiTanggal = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
             const tanggalStr = sekarang.toLocaleDateString('id-ID', opsiTanggal);
             
-            // Format Jam, Menit, Detik (Selalu 2 digit, misal: 09:05:01)
             const jam = String(sekarang.getHours()).padStart(2, '0');
             const menit = String(sekarang.getMinutes()).padStart(2, '0');
             const detik = String(sekarang.getSeconds()).padStart(2, '0');
             
-            // Gabungkan teks dan tampilkan
             document.getElementById('jam-digital').innerText = `🕒 ${tanggalStr} | Waktu: ${jam}:${menit}:${detik}`;
         }
-
-        // Jalankan fungsi waktu setiap 1000 milidetik (1 detik)
         setInterval(updateWaktu, 1000);
 
 
-        // 2. FUNGSI HITUNG OTOMATIS DARI JSON
+        // 2. LOGIKA AMBIL DATA & HITUNG OTOMATIS
         async function muatDataInfaq() {
             try {
                 const respon = await fetch('data.json');
@@ -219,7 +213,7 @@
                 let totalMasuk = 0;
                 let totalKeluar = 0;
 
-                // Proses Tabel Infaq Masuk
+                // Hitung & buat baris tabel pemasukan secara otomatis
                 const bodyMasuk = document.getElementById('tabel-masuk');
                 bodyMasuk.innerHTML = ""; 
                 data.riwayat_masuk.forEach(item => {
@@ -232,7 +226,7 @@
                     bodyMasuk.innerHTML += baris;
                 });
 
-                // Proses Tabel Infaq Keluar
+                // Hitung & buat baris tabel pengeluaran secara otomatis
                 const bodyKeluar = document.getElementById('tabel-keluar');
                 bodyKeluar.innerHTML = ""; 
                 data.riwayat_keluar.forEach(item => {
@@ -245,24 +239,28 @@
                     bodyKeluar.innerHTML += baris;
                 });
 
-                // Hitung Saldo Akhir
+                // Hitung sisa saldo bersih
                 const sisaSaldo = totalMasuk - totalKeluar;
 
-                // Tampilkan hasil hitungan ke kotak ringkasan atas
+                // Tampilkan hasil hitungan ke layar atas
                 document.getElementById('txt-masuk').innerText = totalMasuk.toLocaleString('id-ID');
                 document.getElementById('txt-keluar').innerText = totalKeluar.toLocaleString('id-ID');
                 document.getElementById('txt-saldo').innerText = sisaSaldo.toLocaleString('id-ID');
-                document.getElementById('txt-catatan').innerText = data.catatan_terakhir;
+                
+                // PEMBARUAN OTOMATIS: Mengatur teks keterangan berdasarkan kalender hari ini
+                const opsiBulanTahun = { month: 'long', year: 'numeric' };
+                const bulanTahunSekarang = new Date().toLocaleDateString('id-ID', opsiBulanTahun);
+                document.getElementById('txt-catatan').innerText = `Pembaruan kas bulan ${bulanTahunSekarang}`;
 
             } catch (error) {
                 console.error("Gagal memuat detail data:", error);
-                document.getElementById('txt-catatan').innerText = "Gagal membaca struktur file JSON.";
+                document.getElementById('txt-catatan').innerText = "Gagal memuat data dari file JSON.";
             }
         }
 
-        // Jalankan fungsi saat halaman pertama kali dibuka
+        // Jalankan perintah saat halaman web siap dibuka
         window.onload = function() {
-            updateWaktu(); // Langsung jalankan jam tanpa nunggu 1 detik pertama
+            updateWaktu(); 
             muatDataInfaq();
         };
     </script>
