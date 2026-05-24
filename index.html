@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Informasi Infaq Yayasan</title>
+    <title>Laporan Infaq Sedulur Muslim Jawa Timur</title>
     <style>
         * {
             box-sizing: border-box;
@@ -38,6 +38,17 @@
         header p {
             color: #7f8c8d;
             font-size: 14px;
+            margin-bottom: 10px;
+        }
+        /* Style untuk Waktu Terkini */
+        .waktu-terkini {
+            display: inline-block;
+            font-size: 13px;
+            color: #2980b9;
+            background-color: #e8f4fd;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 600;
         }
         .grid-keuangan {
             display: grid;
@@ -76,7 +87,6 @@
             margin-bottom: 30px;
         }
 
-        /* --- STYLES BARU UNTUK TABEL DETAIL DATA --- */
         .section-detail {
             margin-top: 25px;
         }
@@ -120,10 +130,13 @@
 
     <div class="container">
         <header>
-            <h1>Laporan Transparansi Kas Infaq</h1>
-            <p>Manajemen data keuangan secara terbuka dan aman</p>
+            <h1>Laporan Infaq Sedulur Muslim Jawa Timur</h1>
+            <p>Manajemen data keuangan secara terbuka, aman, dan transparan</p>
+            <!-- Elemen untuk menampilkan tanggal dan jam -->
+            <div class="waktu-terkini" id="jam-digital">Memuat waktu...</div>
         </header>
 
+        <!-- GRID SALDO UTAMA -->
         <div class="grid-keuangan">
             <div class="kartu kartu-masuk">
                 <h3>Total Infaq Masuk</h3>
@@ -143,6 +156,7 @@
             <strong>Keterangan:</strong> <span id="txt-catatan">Memuat data...</span>
         </div>
 
+        <!-- TABEL RINCIAN MASUK -->
         <div class="section-detail">
             <h2 class="title-masuk">Rincian Infaq Masuk</h2>
             <table>
@@ -153,11 +167,11 @@
                         <th class="text-kanan">Jumlah</th>
                     </tr>
                 </thead>
-                <tbody id="tabel-masuk">
-                    </tbody>
+                <tbody id="tabel-masuk"></tbody>
             </table>
         </div>
 
+        <!-- TABEL RINCIAN KELUAR -->
         <div class="section-detail">
             <h2 class="title-keluar">Rincian Pengeluaran Kas</h2>
             <table>
@@ -168,30 +182,48 @@
                         <th class="text-kanan">Jumlah</th>
                     </tr>
                 </thead>
-                <tbody id="tabel-keluar">
-                    </tbody>
+                <tbody id="tabel-keluar"></tbody>
             </table>
         </div>
 
     </div>
 
     <script>
+        // 1. FUNGSI JAM DIGITAL REAL-TIME (TANGGAL, JAM, MENIT, DETIK)
+        function updateWaktu() {
+            const sekarang = new Date();
+            
+            // Format Tanggal Indonesia
+            const opsiTanggal = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+            const tanggalStr = sekarang.toLocaleDateString('id-ID', opsiTanggal);
+            
+            // Format Jam, Menit, Detik (Selalu 2 digit, misal: 09:05:01)
+            const jam = String(sekarang.getHours()).padStart(2, '0');
+            const menit = String(sekarang.getMinutes()).padStart(2, '0');
+            const detik = String(sekarang.getSeconds()).padStart(2, '0');
+            
+            // Gabungkan teks dan tampilkan
+            document.getElementById('jam-digital').innerText = `🕒 ${tanggalStr} | Waktu: ${jam}:${menit}:${detik}`;
+        }
+
+        // Jalankan fungsi waktu setiap 1000 milidetik (1 detik)
+        setInterval(updateWaktu, 1000);
+
+
+        // 2. FUNGSI HITUNG OTOMATIS DARI JSON
         async function muatDataInfaq() {
             try {
                 const respon = await fetch('data.json');
                 const data = await respon.json();
 
-                // Variabel penampung hitungan otomatis
                 let totalMasuk = 0;
                 let totalKeluar = 0;
 
-                // 1. Proses & Hitung Otomatis Tabel Infaq Masuk
+                // Proses Tabel Infaq Masuk
                 const bodyMasuk = document.getElementById('tabel-masuk');
                 bodyMasuk.innerHTML = ""; 
                 data.riwayat_masuk.forEach(item => {
-                    // Tambahkan nilai jumlah ke totalMasuk secara otomatis
                     totalMasuk += item.jumlah;
-
                     let baris = `<tr>
                         <td>${item.tanggal}</td>
                         <td>${item.keterangan}</td>
@@ -200,13 +232,11 @@
                     bodyMasuk.innerHTML += baris;
                 });
 
-                // 2. Proses & Hitung Otomatis Tabel Infaq Keluar
+                // Proses Tabel Infaq Keluar
                 const bodyKeluar = document.getElementById('tabel-keluar');
                 bodyKeluar.innerHTML = ""; 
                 data.riwayat_keluar.forEach(item => {
-                    // Tambahkan nilai jumlah ke totalKeluar secara otomatis
                     totalKeluar += item.jumlah;
-
                     let baris = `<tr>
                         <td>${item.tanggal}</td>
                         <td>${item.keterangan}</td>
@@ -215,16 +245,14 @@
                     bodyKeluar.innerHTML += baris;
                 });
 
-                // 3. Hitung Sisa Saldo Akhir
+                // Hitung Saldo Akhir
                 const sisaSaldo = totalMasuk - totalKeluar;
 
-                // 4. Tampilkan hasil hitungan otomatis ke Kotak Saldo Atas
+                // Tampilkan hasil hitungan ke kotak ringkasan atas
                 document.getElementById('txt-masuk').innerText = totalMasuk.toLocaleString('id-ID');
                 document.getElementById('txt-keluar').innerText = totalKeluar.toLocaleString('id-ID');
                 document.getElementById('txt-saldo').innerText = sisaSaldo.toLocaleString('id-ID');
-                
-                // Tampilkan catatan tambahan
-                document.getElementById('txt-catatan').innerText = data.catatan_terakhir || "Data berhasil diperbarui otomatis.";
+                document.getElementById('txt-catatan').innerText = data.catatan_terakhir;
 
             } catch (error) {
                 console.error("Gagal memuat detail data:", error);
@@ -232,7 +260,11 @@
             }
         }
 
-        window.onload = muatDataInfaq;
+        // Jalankan fungsi saat halaman pertama kali dibuka
+        window.onload = function() {
+            updateWaktu(); // Langsung jalankan jam tanpa nunggu 1 detik pertama
+            muatDataInfaq();
+        };
     </script>
 </body>
 </html>
