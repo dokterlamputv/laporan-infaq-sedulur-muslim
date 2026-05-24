@@ -124,7 +124,6 @@
             <p>Manajemen data keuangan secara terbuka dan aman</p>
         </header>
 
-        <!-- GRID SALDO UTAMA -->
         <div class="grid-keuangan">
             <div class="kartu kartu-masuk">
                 <h3>Total Infaq Masuk</h3>
@@ -144,11 +143,6 @@
             <strong>Keterangan:</strong> <span id="txt-catatan">Memuat data...</span>
         </div>
 
-        <!-- ======================================================= -->
-        <!-- BAGIAN BARU: TABEL KETERANGAN RINCIAN MASUK & KELUAR -->
-        <!-- ======================================================= -->
-        
-        <!-- Rincian Infaq Masuk -->
         <div class="section-detail">
             <h2 class="title-masuk">Rincian Infaq Masuk</h2>
             <table>
@@ -160,12 +154,10 @@
                     </tr>
                 </thead>
                 <tbody id="tabel-masuk">
-                    <!-- Data dari JSON akan disisipkan di sini oleh JS -->
-                </tbody>
+                    </tbody>
             </table>
         </div>
 
-        <!-- Rincian Pengeluaran -->
         <div class="section-detail">
             <h2 class="title-keluar">Rincian Pengeluaran Kas</h2>
             <table>
@@ -177,34 +169,29 @@
                     </tr>
                 </thead>
                 <tbody id="tabel-keluar">
-                    <!-- Data dari JSON akan disisipkan di sini oleh JS -->
-                </tbody>
+                    </tbody>
             </table>
         </div>
 
     </div>
 
-    <!-- SCRIPT LOGIKA JAVASCRIPT -->
     <script>
         async function muatDataInfaq() {
             try {
                 const respon = await fetch('data.json');
                 const data = await respon.json();
 
-                // 1. Kalkulasi Kotak Saldo Atas
-                const totalMasuk = data.total_masuk;
-                const totalKeluar = data.total_keluar;
-                const sisaSaldo = totalMasuk - totalKeluar;
+                // Variabel penampung hitungan otomatis
+                let totalMasuk = 0;
+                let totalKeluar = 0;
 
-                document.getElementById('txt-masuk').innerText = totalMasuk.toLocaleString('id-ID');
-                document.getElementById('txt-keluar').innerText = totalKeluar.toLocaleString('id-ID');
-                document.getElementById('txt-saldo').innerText = sisaSaldo.toLocaleString('id-ID');
-                document.getElementById('txt-catatan').innerText = data.catatan_terakhir;
-
-                // 2. Tampilkan Rincian Tabel Infaq Masuk
+                // 1. Proses & Hitung Otomatis Tabel Infaq Masuk
                 const bodyMasuk = document.getElementById('tabel-masuk');
-                bodyMasuk.innerHTML = ""; // Bersihkan tabel awal
+                bodyMasuk.innerHTML = ""; 
                 data.riwayat_masuk.forEach(item => {
+                    // Tambahkan nilai jumlah ke totalMasuk secara otomatis
+                    totalMasuk += item.jumlah;
+
                     let baris = `<tr>
                         <td>${item.tanggal}</td>
                         <td>${item.keterangan}</td>
@@ -213,10 +200,13 @@
                     bodyMasuk.innerHTML += baris;
                 });
 
-                // 3. Tampilkan Rincian Tabel Infaq Keluar
+                // 2. Proses & Hitung Otomatis Tabel Infaq Keluar
                 const bodyKeluar = document.getElementById('tabel-keluar');
-                bodyKeluar.innerHTML = ""; // Bersihkan tabel awal
+                bodyKeluar.innerHTML = ""; 
                 data.riwayat_keluar.forEach(item => {
+                    // Tambahkan nilai jumlah ke totalKeluar secara otomatis
+                    totalKeluar += item.jumlah;
+
                     let baris = `<tr>
                         <td>${item.tanggal}</td>
                         <td>${item.keterangan}</td>
@@ -224,6 +214,17 @@
                     </tr>`;
                     bodyKeluar.innerHTML += baris;
                 });
+
+                // 3. Hitung Sisa Saldo Akhir
+                const sisaSaldo = totalMasuk - totalKeluar;
+
+                // 4. Tampilkan hasil hitungan otomatis ke Kotak Saldo Atas
+                document.getElementById('txt-masuk').innerText = totalMasuk.toLocaleString('id-ID');
+                document.getElementById('txt-keluar').innerText = totalKeluar.toLocaleString('id-ID');
+                document.getElementById('txt-saldo').innerText = sisaSaldo.toLocaleString('id-ID');
+                
+                // Tampilkan catatan tambahan
+                document.getElementById('txt-catatan').innerText = data.catatan_terakhir || "Data berhasil diperbarui otomatis.";
 
             } catch (error) {
                 console.error("Gagal memuat detail data:", error);
