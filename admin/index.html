@@ -98,7 +98,8 @@
     </div>
 
     <script>
-       const URL_API_WORKER = "https://github-user.alisykarima.workers.dev";
+        // Alamat pemanggilan data menembak lurus ke Worker github-user Anda yang baru
+        const URL_API_WORKER = "https://github-user.alisykarima.workers.dev";
         
         let pinInputSekarang = "";
         let pinTerverifikasi = "";
@@ -154,7 +155,6 @@
 
         document.getElementById('form-infaq').addEventListener('submit', async function(e) {
             e.preventDefault();
-            
             const tombol = document.getElementById('btn-submit-data');
             tombol.innerText = "Sedang Menyimpan...";
             tombol.disabled = true;
@@ -184,7 +184,7 @@
                     if(hasil.pesan.includes("PIN")) logoutAdmin();
                 }
             } catch (err) {
-                alert("Gagal terkoneksi ke server Cloudflare Worker. Pastikan script Worker Anda sudah di-deploy.");
+                alert("Gagal terkoneksi ke server Cloudflare Worker.");
             } finally {
                 tombol.innerText = "Simpan ke GitHub";
                 tombol.disabled = false;
