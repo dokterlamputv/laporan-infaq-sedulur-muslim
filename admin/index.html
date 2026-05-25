@@ -100,25 +100,22 @@
     </div>
 
     <script>
-        const URL_API_WORKER = "https://laporan-infaq-sedulur-muslim.dokterlamputv.workers.dev";
+        const URL_API_WORKER = "https://laporan-infaq-sedulur-muslim.alisykarima.workers.dev";
         
         let pinInputSekarang = "";
         let pinTerverifikasi = "";
 
-        // Fungsi menangani sentuhan angka di layar
         function tekanAngka(angka) {
-            if (pinInputSekarang.length >= 6) return; // Maksimal 6 digit PIN
+            if (pinInputSekarang.length >= 6) return;
             
             pinInputSekarang += angka;
             updateIndikatorDot();
 
-            // Jika digit sudah lengkap 6 angka, langsung otomatis cek keabsahan PIN
             if (pinInputSekarang.length === 6) {
                 setTimeout(validasiPinMasuk, 150);
             }
         }
 
-        // Fungsi menghapus digit terakhir (tombol merah)
         function hapusAngka() {
             if (pinInputSekarang.length > 0) {
                 pinInputSekarang = pinInputSekarang.slice(0, -1);
@@ -126,7 +123,6 @@
             }
         }
 
-        // Memperbarui bulatan hitam indikator pengisian di atas tombol
         function updateIndikatorDot() {
             for (let i = 0; i < 6; i++) {
                 const dot = document.getElementById(`dot-${i}`);
@@ -138,7 +134,6 @@
             }
         }
 
-        // Pencocokan PIN rahasia 234123
         function validasiPinMasuk() {
             if (pinInputSekarang === "234123") {
                 pinTerverifikasi = pinInputSekarang;
@@ -160,7 +155,6 @@
             document.getElementById('box-login-pin').style.display = 'block';
         }
 
-        // Pengiriman payload objek data transaksi ke Worker Cloudflare
         document.getElementById('form-infaq').addEventListener('submit', async function(e) {
             e.preventDefault();
             
