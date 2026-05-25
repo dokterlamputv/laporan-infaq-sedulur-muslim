@@ -6,7 +6,7 @@
     <title>Panel Admin - Login</title>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f6; padding: 30px 15px; }
-        .container { max-width: 450px; margin: 40px auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .container { max-width: 450px; margin: 20px auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
         h1 { font-size: 20px; color: #2c3e50; margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px; text-align: center; }
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; font-size: 14px; margin-bottom: 5px; font-weight: 600; }
@@ -15,28 +15,58 @@
         .btn-aksi:hover { background-color: #219653; }
         .btn-aksi:disabled { background-color: #bdc3c7; cursor: not-allowed; }
         .btn-kembali { display: block; text-align: center; margin-top: 15px; font-size: 13px; color: #7f8c8d; text-decoration: none; }
+        
         #box-admin-utama { display: none; }
         #box-login-pin { display: block; }
 
-        /* Trik CSS agar input tel otomatis menyamarkan angka menjadi bulatan sandi rahasia */
-        .input-pin-keypad {
-            text-align: center; 
-            font-size: 24px; 
-            letter-spacing: 8px;
-            -webkit-text-security: disc; 
-            text-security: disc;
+        /* Tampilan Tanda Titik PIN Keamanan */
+        .display-pin-wrapper { display: flex; justify-content: center; gap: 15px; margin: 20px 0 30px 0; }
+        .dot-pin { width: 16px; height: 16px; border: 2px solid #bdc3c7; border-radius: 50%; transition: background-color 0.1s; }
+        .dot-pin.aktif { background-color: #2c3e50; border-color: #2c3e50; }
+
+        /* Desain Grid Keypad Angka Sentuh */
+        .grid-keypad-sentuh { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; max-width: 280px; margin: 0 auto; }
+        .btn-keypad { 
+            background-color: #f8f9fa; border: 1px solid #e2e8f0; color: #2c3e50; 
+            font-size: 22px; font-weight: bold; border-radius: 50%; width: 70px; height: 70px; 
+            display: flex; align-items: center; justify-content: center; margin: 0 auto;
+            cursor: pointer; user-select: none; transition: background-color 0.1s;
         }
+        .btn-keypad:active { background-color: #e2e8f0; }
+        .btn-keypad.btn-hapus { background-color: #fee2e2; border-color: #fca5a5; color: #ef4444; font-size: 16px; }
+        .btn-keypad.btn-hapus:active { background-color: #fca5a5; }
     </style>
 </head>
 <body>
 
     <div class="container" id="box-login-pin">
         <h1>Keamanan Admin</h1>
-        <div class="form-group">
-            <label>Masukkan PIN Akses</label>
-            <input type="tel" id="input-pin" class="input-pin-keypad" placeholder="••••••" inputmode="numeric" pattern="[0-9]*" required autocomplete="off">
+        <p style="text-align: center; font-size: 14px; color: #7f8c8d; margin-bottom: 5px;">Silakan Sentuh PIN Akses Anda</p>
+        
+        <div class="display-pin-wrapper">
+            <div class="dot-pin" id="dot-0"></div>
+            <div class="dot-pin" id="dot-1"></div>
+            <div class="dot-pin" id="dot-2"></div>
+            <div class="dot-pin" id="dot-3"></div>
+            <div class="dot-pin" id="dot-4"></div>
+            <div class="dot-pin" id="dot-5"></div>
         </div>
-        <button type="button" class="btn-aksi" onclick="cekPin()">Masuk Panel</button>
+
+        <div class="grid-keypad-sentuh">
+            <div class="btn-keypad" onclick="tekanAngka('1')">1</div>
+            <div class="btn-keypad" onclick="tekanAngka('2')">2</div>
+            <div class="btn-keypad" onclick="tekanAngka('3')">3</div>
+            <div class="btn-keypad" onclick="tekanAngka('4')">4</div>
+            <div class="btn-keypad" onclick="tekanAngka('5')">5</div>
+            <div class="btn-keypad" onclick="tekanAngka('6')">6</div>
+            <div class="btn-keypad" onclick="tekanAngka('7')">7</div>
+            <div class="btn-keypad" onclick="tekanAngka('8')">8</div>
+            <div class="btn-keypad" onclick="tekanAngka('9')">9</div>
+            <div class="btn-keypad btn-hapus" onclick="hapusAngka()">Hapus</div>
+            <div class="btn-keypad" onclick="tekanAngka('0')">0</div>
+            <div class="btn-keypad" style="visibility: hidden;"></div>
+        </div>
+
         <a href="../index.html" class="btn-kembali">← Kembali ke Halaman Utama</a>
     </div>
 
@@ -70,34 +100,67 @@
     </div>
 
     <script>
-        // MASUKKAN URL WORKER CLOUDFLARE LIVE ANDA DI SINI
         const URL_API_WORKER = "https://laporan-infaq-sedulur-muslim.dokterlamputv.workers.dev";
-
+        
+        let pinInputSekarang = "";
         let pinTerverifikasi = "";
 
-        // Fungsi mencocokkan PIN di browser sebelum membuka gerbang data
-        function cekPin() {
-            const pinSaran = document.getElementById('input-pin').value;
-            if (pinSaran === "234123") {
-                pinTerverifikasi = pinSaran;
-                document.getElementById('box-login-pin').style.display = 'none';
-                document.getElementById('box-admin-utama').style.display = 'block';
-                document.getElementById('form-tanggal').valueAsDate = new Date(); // otomatis isi tanggal hari ini
-            } else {
-                alert("PIN salah! Akses ditolak.");
-                document.getElementById('input-pin').value = "";
+        // Fungsi menangani sentuhan angka di layar
+        function tekanAngka(angka) {
+            if (pinInputSekarang.length >= 6) return; // Maksimal 6 digit PIN
+            
+            pinInputSekarang += angka;
+            updateIndikatorDot();
+
+            // Jika digit sudah lengkap 6 angka, langsung otomatis cek keabsahan PIN
+            if (pinInputSekarang.length === 6) {
+                setTimeout(validasiPinMasuk, 150);
             }
         }
 
-        // Fungsi mengunci kembali halaman admin
+        // Fungsi menghapus digit terakhir (tombol merah)
+        function hapusAngka() {
+            if (pinInputSekarang.length > 0) {
+                pinInputSekarang = pinInputSekarang.slice(0, -1);
+                updateIndikatorDot();
+            }
+        }
+
+        // Memperbarui bulatan hitam indikator pengisian di atas tombol
+        function updateIndikatorDot() {
+            for (let i = 0; i < 6; i++) {
+                const dot = document.getElementById(`dot-${i}`);
+                if (i < pinInputSekarang.length) {
+                    dot.classList.add('aktif');
+                } else {
+                    dot.classList.remove('aktif');
+                }
+            }
+        }
+
+        // Pencocokan PIN rahasia 234123
+        function validasiPinMasuk() {
+            if (pinInputSekarang === "234123") {
+                pinTerverifikasi = pinInputSekarang;
+                document.getElementById('box-login-pin').style.display = 'none';
+                document.getElementById('box-admin-utama').style.display = 'block';
+                document.getElementById('form-tanggal').valueAsDate = new Date();
+            } else {
+                alert("PIN salah! Akses ditolak.");
+                pinInputSekarang = "";
+                updateIndikatorDot();
+            }
+        }
+
         function logoutAdmin() {
+            pinInputSekarang = "";
             pinTerverifikasi = "";
-            document.getElementById('input-pin').value = "";
+            updateIndikatorDot();
             document.getElementById('box-admin-utama').style.display = 'none';
             document.getElementById('box-login-pin').style.display = 'block';
         }
 
-        // Mengirimkan payload objek data ke backend Worker Cloudflare
+        // Pengiriman payload objek data transaksi ke Worker Cloudflare
         document.getElementById('form-infaq').addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -110,7 +173,7 @@
                 jenis: document.getElementById('form-jenis').value,
                 keterangan: document.getElementById('form-keterangan').value,
                 jumlah: document.getElementById('form-jumlah').value,
-                pin_admin: pinTerverifikasi // Ikut diverifikasi ulang di server worker agar aman dari manipulasi inspect element
+                pin_admin: pinTerverifikasi
             };
 
             try {
@@ -130,7 +193,7 @@
                     if(hasil.pesan.includes("PIN")) logoutAdmin();
                 }
             } catch (err) {
-                alert("Koneksi ke Worker gagal. Periksa koneksi internet atau setelan worker.");
+                alert("Koneksi ke Worker gagal. Periksa jaringan internet Anda.");
             } finally {
                 tombol.innerText = "Simpan ke GitHub";
                 tombol.disabled = false;
