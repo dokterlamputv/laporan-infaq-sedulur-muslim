@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Admin - Input Infaq</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f6; padding: 30px 15px; }
+        .container { max-width: 500px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        h1 { font-size: 20px; color: #2c3e50; margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px; text-align: center; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-size: 14px; margin-bottom: 5px; font-weight: 600; }
+        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px; }
+        .btn-simpan { background-color: #27ae60; color: white; border: none; padding: 12px; border-radius: 4px; cursor: pointer; width: 100%; font-weight: bold; font-size: 15px; margin-top: 10px; }
+        .btn-simpan:hover { background-color: #219653; }
+        .btn-simpan:disabled { background-color: #bdc3c7; cursor: not-allowed; }
+        .btn-kembali { display: block; text-align: center; margin-top: 15px; font-size: 13px; color: #7f8c8d; text-decoration: none; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Panel Input Kas Infaq</h1>
+        
+        <form id="form-infaq">
+            <div class="form-group">
+                <label>Tanggal Transaksi</label>
+                <input type="date" id="form-tanggal" required>
+            </div>
+            <div class="form-group">
+                <label>Jenis Transaksi</label>
+                <select id="form-jenis">
+                    <option value="Masuk">Infaq Masuk (Pemasukan)</option>
+                    <option value="Keluar">Pengeluaran Kas</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Keterangan</label>
+                <input type="text" id="form-keterangan" placeholder="Contoh: Hamba Alloh / Beli Karpet" required>
+            </div>
+            <div class="form-group">
+                <label>Jumlah (Angka Saja)</label>
+                <input type="number" id="form-jumlah" placeholder="Contoh: 50000" required>
+            </div>
+            <div class="form-group">
+                <label>Token Akses GitHub (On-Demand Password)</label>
+                <input type="password" id="form-token" placeholder="Masukkan ghp_xxxxxxxx" required>
+            </div>
+            
+            <button type="submit" class="btn-simpan">Kirim & Simpan ke GitHub</button>
+            <a href="index.html" class="btn-kembali">← Kembali ke Laporan Utama</a>
+        </form>
+    </div>
+
+    <script>
+        // ========================================================
+        // MASUKKAN URL LIVE WORKER CLOUDFLARE ANDA DI SINI
+        // ========================================================
+        const URL_API_WORKER = "https://api-infaq.USERNAME_ANDA.workers.dev";
+
+        // Mengatur bawaan form tanggal otomatis hari ini
+        document.getElementById('form-tanggal').valueAsDate = new Date();
+
+        document.getElementById('form-infaq').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const tombol = document.querySelector('.btn-simpan');
+            const teksAwal = tombol.innerText;
+            tombol.innerText = "Sedang Memproses Commit via Worker...";
+            tombol.disabled = true;
+
+            // Membangun data payload yang akan dikirim (Token dipanggil tepat di saat klik ini saja)
+            const payload = {
+                tanggal: document.getElementById('form-tanggal').value,
+                jenis: document.getElementById('form-jenis').value,
+                keterangan: document.getElementById('form-keterangan').value,
+                jumlah: document.getElementById('form-jumlah').value,
+                token_admin: document.getElementById('form-token').value 
+            };
+
+            try {
+                const respon = await fetch(URL_API_WORKER, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+
+                const hasil = await respon.json();
+                if (hasil.status === "sukses") {
+                    alert("Alhamdulillah, data kas berhasil ditambahkan dan disimpan di GitHub!");
+                    // Reset input teks agar bisa input data selanjutnya tanpa reload halaman
+                    document.getElementById('form-keterangan').value = "";
+                    document.getElementById('form-jumlah').value = "";
+                } else {
+                    alert("Gagal memproses data: " + hasil.pesan);
+                }
+            } catch (err) {
+                alert("Gagal terhubung ke Cloudflare Worker API. Periksa setelan CORS atau URL Worker Anda.");
+            } finally {
+                tombol.innerText = teksAwal;
+                tombol.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
