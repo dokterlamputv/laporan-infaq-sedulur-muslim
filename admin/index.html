@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -19,12 +18,12 @@
         #box-admin-utama { display: none; }
         #box-login-pin { display: block; }
 
-        /* Trik CSS agar input type="number" / "tel" tampil bulat-bulat rahasia seperti password */
+        /* Trik CSS agar input tel otomatis menyamarkan angka menjadi bulatan sandi rahasia */
         .input-pin-keypad {
             text-align: center; 
             font-size: 24px; 
             letter-spacing: 8px;
-            -webkit-text-security: disc; /* Untuk Chrome, Safari, Android Browser */
+            -webkit-text-security: disc; 
             text-security: disc;
         }
     </style>
@@ -38,7 +37,7 @@
             <input type="tel" id="input-pin" class="input-pin-keypad" placeholder="••••••" inputmode="numeric" pattern="[0-9]*" required autocomplete="off">
         </div>
         <button type="button" class="btn-aksi" onclick="cekPin()">Masuk Panel</button>
-        <a href="index.html" class="btn-kembali">← Kembali ke Halaman Utama</a>
+        <a href="../index.html" class="btn-kembali">← Kembali ke Halaman Utama</a>
     </div>
 
     <div class="container" id="box-admin-utama">
@@ -71,24 +70,26 @@
     </div>
 
     <script>
-        // GANTI DENGAN URL LIVE WORKER CLOUDFLARE ANDA
-        const URL_API_WORKER = "https://laporan-infaq-sedulur-muslim.USERNAME_ANDA.workers.dev";
+        // MASUKKAN URL WORKER CLOUDFLARE LIVE ANDA DI SINI
+        const URL_API_WORKER = "https://laporan-infaq-sedulur-muslim.dokterlamputv.workers.dev";
 
         let pinTerverifikasi = "";
 
+        // Fungsi mencocokkan PIN di browser sebelum membuka gerbang data
         function cekPin() {
             const pinSaran = document.getElementById('input-pin').value;
             if (pinSaran === "234123") {
                 pinTerverifikasi = pinSaran;
                 document.getElementById('box-login-pin').style.display = 'none';
                 document.getElementById('box-admin-utama').style.display = 'block';
-                document.getElementById('form-tanggal').valueAsDate = new Date();
+                document.getElementById('form-tanggal').valueAsDate = new Date(); // otomatis isi tanggal hari ini
             } else {
                 alert("PIN salah! Akses ditolak.");
                 document.getElementById('input-pin').value = "";
             }
         }
 
+        // Fungsi mengunci kembali halaman admin
         function logoutAdmin() {
             pinTerverifikasi = "";
             document.getElementById('input-pin').value = "";
@@ -96,6 +97,7 @@
             document.getElementById('box-login-pin').style.display = 'block';
         }
 
+        // Mengirimkan payload objek data ke backend Worker Cloudflare
         document.getElementById('form-infaq').addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -108,7 +110,7 @@
                 jenis: document.getElementById('form-jenis').value,
                 keterangan: document.getElementById('form-keterangan').value,
                 jumlah: document.getElementById('form-jumlah').value,
-                pin_admin: pinTerverifikasi
+                pin_admin: pinTerverifikasi // Ikut diverifikasi ulang di server worker agar aman dari manipulasi inspect element
             };
 
             try {
@@ -128,7 +130,7 @@
                     if(hasil.pesan.includes("PIN")) logoutAdmin();
                 }
             } catch (err) {
-                alert("Koneksi ke Worker gagal. Pastikan URL Worker benar.");
+                alert("Koneksi ke Worker gagal. Periksa koneksi internet atau setelan worker.");
             } finally {
                 tombol.innerText = "Simpan ke GitHub";
                 tombol.disabled = false;
