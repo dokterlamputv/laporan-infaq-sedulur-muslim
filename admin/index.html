@@ -3,15 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Admin - Login</title>
+    <title>Panel Admin - Kelola Kas</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f6; padding: 30px 15px; }
-        .container { max-width: 450px; margin: 20px auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        h1 { font-size: 20px; color: #2c3e50; margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px; text-align: center; }
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; font-size: 14px; margin-bottom: 5px; font-weight: 600; }
-        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px; }
-        .btn-aksi { background-color: #27ae60; color: white; border: none; padding: 12px; border-radius: 4px; cursor: pointer; width: 100%; font-weight: bold; font-size: 15px; margin-top: 10px; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f6; padding: 20px 10px; color: #333; }
+        .container { max-width: 750px; margin: 10px auto; background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        h1 { font-size: 20px; color: #2c3e50; margin-bottom: 15px; border-bottom: 2px solid #eee; padding-bottom: 8px; text-align: center; }
+        h2 { font-size: 16px; color: #2c3e50; margin: 20px 0 10px 0; padding-bottom: 5px; border-bottom: 1px solid #ddd; }
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; font-size: 13px; margin-bottom: 4px; font-weight: 600; }
+        .form-group input, .form-group select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px; }
+        
+        .btn-aksi { background-color: #27ae60; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; width: 100%; font-weight: bold; font-size: 14px; margin-top: 5px; }
         .btn-aksi:hover { background-color: #219653; }
         .btn-aksi:disabled { background-color: #bdc3c7; cursor: not-allowed; }
         .btn-kembali { display: block; text-align: center; margin-top: 15px; font-size: 13px; color: #7f8c8d; text-decoration: none; }
@@ -19,20 +21,31 @@
         #box-admin-utama { display: none; }
         #box-login-pin { display: block; }
 
+        /* Keypad Style */
         .display-pin-wrapper { display: flex; justify-content: center; gap: 15px; margin: 20px 0 30px 0; }
-        .dot-pin { width: 16px; height: 16px; border: 2px solid #bdc3c7; border-radius: 50%; transition: background-color 0.1s; }
+        .dot-pin { width: 16px; height: 16px; border: 2px solid #bdc3c7; border-radius: 50%; }
         .dot-pin.aktif { background-color: #2c3e50; border-color: #2c3e50; }
-
         .grid-keypad-sentuh { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; max-width: 280px; margin: 0 auto; }
-        .btn-keypad { 
-            background-color: #f8f9fa; border: 1px solid #e2e8f0; color: #2c3e50; 
-            font-size: 22px; font-weight: bold; border-radius: 50%; width: 70px; height: 70px; 
-            display: flex; align-items: center; justify-content: center; margin: 0 auto;
-            cursor: pointer; user-select: none; transition: background-color 0.1s;
-        }
+        .btn-keypad { background-color: #f8f9fa; border: 1px solid #e2e8f0; color: #2c3e50; font-size: 22px; font-weight: bold; border-radius: 50%; width: 70px; height: 70px; display: flex; align-items: center; justify-content: center; margin: 0 auto; cursor: pointer; user-select: none; }
         .btn-keypad:active { background-color: #e2e8f0; }
         .btn-keypad.btn-hapus { background-color: #fee2e2; border-color: #fca5a5; color: #ef4444; font-size: 16px; }
-        .btn-keypad.btn-hapus:active { background-color: #fca5a5; }
+
+        /* Gaya Tabel Sederhana Baris & Kolom */
+        .table-responsive { width: 100%; overflow-x: auto; margin-top: 10px; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
+        th, td { padding: 8px 10px; border-bottom: 1px solid #eee; }
+        th { background-color: #f8f9fa; font-weight: 600; color: #555; }
+        tr:hover { background-color: #fafafa; }
+        
+        .btn-tabel { padding: 4px 8px; font-size: 11px; font-weight: bold; border-radius: 3px; border: none; cursor: pointer; margin-right: 2px; }
+        .btn-edit { background-color: #f39c12; color: white; }
+        .btn-edit:hover { background-color: #d35400; }
+        .btn-delete { background-color: #e74c3c; color: white; }
+        .btn-delete:hover { background-color: #c0392b; }
+        
+        .badge { font-weight: bold; }
+        .badge-masuk { color: #27ae60; }
+        .badge-keluar { color: #c0392b; }
     </style>
 </head>
 <body>
@@ -64,19 +77,21 @@
             <div class="btn-keypad" onclick="tekanAngka('0')">0</div>
             <div class="btn-keypad" style="visibility: hidden;"></div>
         </div>
-
         <a href="../index.html" class="btn-kembali">← Kembali ke Halaman Utama</a>
     </div>
 
     <div class="container" id="box-admin-utama">
-        <h1>Panel Input Kas Infaq</h1>
+        <h1 id="judul-form">Tambah Data Kas Baru</h1>
         
         <form id="form-infaq">
+            <input type="hidden" id="edit-index" value="-1">
+            <input type="hidden" id="edit-jenis" value="">
+
             <div class="form-group">
                 <label>Tanggal Transaksi</label>
                 <input type="date" id="form-tanggal" required>
             </div>
-            <div class="form-group">
+            <div class="form-group" id="container-select-jenis">
                 <label>Jenis Transaksi</label>
                 <select id="form-jenis">
                     <option value="Masuk">Infaq Masuk (Pemasukan)</option>
@@ -84,34 +99,54 @@
                 </select>
             </div>
             <div class="form-group">
-                <label>Keterangan</label>
-                <input type="text" id="form-keterangan" placeholder="Contoh: Hamba Alloh / Beli Karpet" required>
+                <label>Keterangan / Sumber Dana</label>
+                <input type="text" id="form-keterangan" placeholder="Contoh: Hamba Alloh / Beli Kabel" required>
             </div>
             <div class="form-group">
-                <label>Jumlah (Angka Saja)</label>
+                <label>Jumlah (Rp)</label>
                 <input type="number" id="form-jumlah" placeholder="Contoh: 50000" required>
             </div>
             
             <button type="submit" class="btn-aksi" id="btn-submit-data">Simpan ke GitHub</button>
-            <button type="button" class="btn-kembali" onclick="logoutAdmin()" style="background: none; border: none; cursor: pointer; width: 100%;">🔒 Kunci & Keluar Panel</button>
+            <button type="button" class="btn-kembali" id="btn-batal-edit" onclick="resetForm()" style="display:none; color:#e67e22; font-weight:bold; margin-bottom:10px;">❌ Batal Edit & Mode Tambah Baru</button>
         </form>
+
+        <hr style="margin: 25px 0; border: 0; border-top: 2px dashed #eee;">
+
+        <h1>Daftar Semua Riwayat Kas</h1>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tanggal</th>
+                        <th>Jenis</th>
+                        <th>Keterangan</th>
+                        <th>Jumlah</th>
+                        <th style="text-align: center;">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="tabel-kelola-data">
+                    <tr><td colspan="5" style="text-align:center; color:#7f8c8d;">Memuat data kas...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <button type="button" class="btn-kembali" onclick="logoutAdmin()" style="background: none; border: none; cursor: pointer; width: 100%; margin-top:30px;">🔒 Kunci & Keluar Panel</button>
     </div>
 
     <script>
-        // Alamat pemanggilan data menembak lurus ke Worker github-user Anda yang baru
+        // Endpoint Worker Backend Anda
         const URL_API_WORKER = "https://github-user.alisykarima.workers.dev";
         
         let pinInputSekarang = "";
         let pinTerverifikasi = "";
+        let dataGlobalCache = { riwayat_masuk: [], riwayat_keluar: [] };
 
         function tekanAngka(angka) {
             if (pinInputSekarang.length >= 6) return;
             pinInputSekarang += angka;
             updateIndikatorDot();
-
-            if (pinInputSekarang.length === 6) {
-                setTimeout(validasiPinMasuk, 150);
-            }
+            if (pinInputSekarang.length === 6) setTimeout(validasiPinMasuk, 150);
         }
 
         function hapusAngka() {
@@ -124,11 +159,7 @@
         function updateIndikatorDot() {
             for (let i = 0; i < 6; i++) {
                 const dot = document.getElementById(`dot-${i}`);
-                if (i < pinInputSekarang.length) {
-                    dot.classList.add('aktif');
-                } else {
-                    dot.classList.remove('aktif');
-                }
+                if (dot) i < pinInputSekarang.length ? dot.classList.add('aktif') : dot.classList.remove('aktif');
             }
         }
 
@@ -137,7 +168,8 @@
                 pinTerverifikasi = pinInputSekarang;
                 document.getElementById('box-login-pin').style.display = 'none';
                 document.getElementById('box-admin-utama').style.display = 'block';
-                document.getElementById('form-tanggal').valueAsDate = new Date();
+                resetForm();
+                ambilDataJsonTerbaru();
             } else {
                 alert("PIN salah! Akses ditolak.");
                 pinInputSekarang = "";
@@ -145,28 +177,133 @@
             }
         }
 
-        function logoutAdmin() {
-            pinInputSekarang = "";
-            pinTerverifikasi = "";
-            updateIndikatorDot();
-            document.getElementById('box-admin-utama').style.display = 'none';
-            document.getElementById('box-login-pin').style.display = 'block';
+        // Ambil data json langsung dari repository publik Anda agar fresh
+        async function ambilDataJsonTerbaru() {
+            try {
+                const respon = await fetch('../data.json?t=' + new Date().getTime());
+                dataGlobalCache = await respon.json();
+                renderTabelAdmin();
+            } catch (err) {
+                document.getElementById('tabel-kelola-data').innerHTML = `<tr><td colspan="5" style="text-align:center; color:#e74c3c;">Gagal memuat file data.json</td></tr>`;
+            }
         }
 
+        // Susun data row demi row ke tabel admin
+        function renderTabelAdmin() {
+            const tbody = document.getElementById('tabel-kelola-data');
+            tbody.innerHTML = "";
+
+            let barisHtml = "";
+
+            // Gabungkan list masuk dan keluar dengan penanda index asal
+            dataGlobalCache.riwayat_masuk.forEach((item, index) => {
+                barisHtml += `
+                    <tr>
+                        <td>${item.tanggal}</td>
+                        <td><span class="badge badge-masuk">Masuk</span></td>
+                        <td>${item.keterangan}</td>
+                        <td class="badge-masuk">Rp ${item.jumlah.toLocaleString('id-ID')}</td>
+                        <td style="text-align: center;">
+                            <button class="btn-tabel btn-edit" onclick="bukaModeEdit(${index}, 'Masuk')">Edit</button>
+                            <button class="btn-tabel btn-delete" onclick="eksekusiHapus(${index}, 'Masuk')">Hapus</button>
+                        </td>
+                    </tr>`;
+            });
+
+            dataGlobalCache.riwayat_keluar.forEach((item, index) => {
+                barisHtml += `
+                    <tr>
+                        <td>${item.tanggal}</td>
+                        <td><span class="badge badge-keluar">Keluar</span></td>
+                        <td>${item.keterangan}</td>
+                        <td class="badge-keluar">Rp ${item.jumlah.toLocaleString('id-ID')}</td>
+                        <td style="text-align: center;">
+                            <button class="btn-tabel btn-edit" onclick="bukaModeEdit(${index}, 'Keluar')">Edit</button>
+                            <button class="btn-tabel btn-delete" onclick="eksekusiHapus(${index}, 'Keluar')">Hapus</button>
+                        </td>
+                    </tr>`;
+            });
+
+            tbody.innerHTML = barisHtml || `<tr><td colspan="5" style="text-align:center; color:#7f8c8d;">Belum ada riwayat transaksi.</td></tr>`;
+        }
+
+        // Naikkan data baris terpilih ke form untuk diupdate
+        function bukaModeEdit(index, jenis) {
+            const item = jenis === 'Masuk' ? dataGlobalCache.riwayat_masuk[index] : dataGlobalCache.riwayat_keluar[index];
+            
+            document.getElementById('judul-form').innerText = `✏️ Mode Update Data (${jenis})`;
+            document.getElementById('edit-index').value = index;
+            document.getElementById('edit-jenis').value = jenis;
+            
+            document.getElementById('form-tanggal').value = item.tanggal;
+            document.getElementById('form-keterangan').value = item.keterangan;
+            document.getElementById('form-jumlah').value = item.jumlah;
+            
+            // Sembunyikan dropdown jenis karena jenis transaksi tidak boleh ditukar saat edit (harus dihapus jika salah jenis)
+            document.getElementById('container-select-jenis').style.display = 'none';
+            document.getElementById('btn-batal-edit').style.display = 'block';
+            document.getElementById('btn-submit-data').innerText = "Update & Simpan Perubahan";
+            document.getElementById('btn-submit-data').style.backgroundColor = "#d35400";
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function resetForm() {
+            document.getElementById('judul-form').innerText = "Tambah Data Kas Baru";
+            document.getElementById('edit-index').value = "-1";
+            document.getElementById('edit-jenis').value = "";
+            document.getElementById('form-tanggal').valueAsDate = new Date();
+            document.getElementById('form-keterangan').value = "";
+            document.getElementById('form-jumlah').value = "";
+            
+            document.getElementById('container-select-jenis').style.display = 'block';
+            document.getElementById('btn-batal-edit').style.display = 'none';
+            document.getElementById('btn-submit-data').innerText = "Simpan ke GitHub";
+            document.getElementById('btn-submit-data').style.backgroundColor = "#27ae60";
+        }
+
+        // Handle submit data (Tambah Baru maupun Update Data Lama)
         document.getElementById('form-infaq').addEventListener('submit', async function(e) {
             e.preventDefault();
             const tombol = document.getElementById('btn-submit-data');
-            tombol.innerText = "Sedang Menyimpan...";
+            const indexEdit = parseInt(document.getElementById('edit-index').value);
+            
+            tombol.innerText = "Sedang Menyimpan Ke GitHub...";
             tombol.disabled = true;
 
             const payload = {
                 tanggal: document.getElementById('form-tanggal').value,
-                jenis: document.getElementById('form-jenis').value,
                 keterangan: document.getElementById('form-keterangan').value,
                 jumlah: document.getElementById('form-jumlah').value,
-                pin_admin: pinTerverifikasi
+                pin_admin: pinTerverifikasi,
+                // Parameter tambahan untuk aksi update/edit
+                aksi: indexEdit === -1 ? "tambah" : "update",
+                jenis: indexEdit === -1 ? document.getElementById('form-jenis').value : document.getElementById('edit-jenis').value,
+                index_target: indexEdit
             };
 
+            await kirimKeWorker(payload);
+        });
+
+        // Handle konfirmasi hapus data kas
+        async function eksekusiHapus(index, jenis) {
+            if (!confirm(`Apakah Anda yakin ingin menghapus permanen data riwayat ${jenis} ini?`)) return;
+            
+            const tbody = document.getElementById('tabel-kelola-data');
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#e67e22; font-weight:bold;">Menghapus & memperbarui GitHub...</td></tr>`;
+
+            const payload = {
+                pin_admin: pinTerverifikasi,
+                aksi: "hapus",
+                jenis: jenis,
+                index_target: index
+            };
+
+            await kirimKeWorker(payload);
+        }
+
+        // Fungsi pusat pengiriman data ke server backend Worker
+        async function kirimKeWorker(payload) {
             try {
                 const respon = await fetch(URL_API_WORKER, {
                     method: "POST",
@@ -176,20 +313,35 @@
 
                 const hasil = await respon.json();
                 if (hasil.status === "sukses") {
-                    alert("Alhamdulillah, data kas berhasil disimpan!");
-                    document.getElementById('form-keterangan').value = "";
-                    document.getElementById('form-jumlah').value = "";
+                    alert("Alhamdulillah, perubahan berhasil disimpan di GitHub!");
+                    resetForm();
+                    await ambilDataJsonTerbaru();
                 } else {
-                    alert("Gagal Menyimpan: " + hasil.pesan);
-                    if(hasil.pesan.includes("PIN")) logoutAdmin();
+                    alert("Gagal: " + hasil.pesan);
+                    if (hasil.pesan.includes("PIN")) logoutAdmin();
                 }
             } catch (err) {
-                alert("Gagal terkoneksi ke server Cloudflare Worker.");
+                alert("Gagal terhubung ke Cloudflare Worker.");
+                renderTabelAdmin();
             } finally {
-                tombol.innerText = "Simpan ke GitHub";
-                tombol.disabled = false;
+                const tombol = document.getElementById('btn-submit-data');
+                if(tombol) {
+                    tombol.disabled = false;
+                    if(parseInt(document.getElementById('edit-index').value) === -1) {
+                        tombol.innerText = "Simpan ke GitHub";
+                    } else {
+                        tombol.innerText = "Update & Simpan Perubahan";
+                    }
+                }
             }
-        });
+        }
+
+        function logoutAdmin() {
+            pinInputSekarang = ""; pinTerverifikasi = "";
+            updateIndikatorDot();
+            document.getElementById('box-admin-utama').style.display = 'none';
+            document.getElementById('box-login-pin').style.display = 'block';
+        }
     </script>
 </body>
 </html>
