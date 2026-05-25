@@ -21,18 +21,16 @@
 </head>
 <body>
 
-    <!-- KOTAK PIN -->
     <div class="container" id="box-login-pin">
         <h1>Keamanan Admin</h1>
         <div class="form-group">
             <label>Masukkan PIN Akses</label>
-            <input type="password" id="input-pin" placeholder="•••••" inputmode="numeric" pattern="[0-9]*" style="text-align: center; font-size: 20px; letter-spacing: 5px;">
+            <input type="password" id="input-pin" placeholder="••••••" inputmode="numeric" pattern="[0-9]*" style="text-align: center; font-size: 20px; letter-spacing: 5px;">
         </div>
         <button type="button" class="btn-aksi" onclick="cekPin()">Masuk Panel</button>
         <a href="index.html" class="btn-kembali">← Kembali ke Halaman Utama</a>
     </div>
 
-    <!-- KOTAK UTAMA INPUT DATA -->
     <div class="container" id="box-admin-utama">
         <h1>Panel Input Kas Infaq</h1>
         
@@ -63,8 +61,8 @@
     </div>
 
     <script>
-        // ISI DENGAN URL WORKER ANDA
-        const URL_API_WORKER = "https://api-infaq.USERNAME_ANDA.workers.dev";
+        // GANTI DENGAN URL LIVE WORKER CLOUDFLARE ANDA
+        const URL_API_WORKER = "https://laporan-infaq-sedulur-muslim.USERNAME_ANDA.workers.dev";
 
         let pinTerverifikasi = "";
 
@@ -120,8 +118,8 @@
                     if(hasil.pesan.includes("PIN")) logoutAdmin();
                 }
             } catch (err) {
-                alert("Koneksi ke Worker gagal.");
-            } finally {
+                alert("Koneksi ke Worker gagal. Pastikan URL Worker benar.");
+            } finaly {
                 tombol.innerText = "Simpan ke GitHub";
                 tombol.disabled = false;
             }
@@ -129,4 +127,3 @@
     </script>
 </body>
 </html>
- 
