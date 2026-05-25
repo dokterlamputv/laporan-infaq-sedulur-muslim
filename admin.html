@@ -3,23 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel Admin - Input Infaq</title>
+    <title>Panel Admin - Login</title>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f6; padding: 30px 15px; }
-        .container { max-width: 500px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .container { max-width: 450px; margin: 40px auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
         h1 { font-size: 20px; color: #2c3e50; margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px; text-align: center; }
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; font-size: 14px; margin-bottom: 5px; font-weight: 600; }
         .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px; }
-        .btn-simpan { background-color: #27ae60; color: white; border: none; padding: 12px; border-radius: 4px; cursor: pointer; width: 100%; font-weight: bold; font-size: 15px; margin-top: 10px; }
-        .btn-simpan:hover { background-color: #219653; }
-        .btn-simpan:disabled { background-color: #bdc3c7; cursor: not-allowed; }
+        .btn-aksi { background-color: #27ae60; color: white; border: none; padding: 12px; border-radius: 4px; cursor: pointer; width: 100%; font-weight: bold; font-size: 15px; margin-top: 10px; }
+        .btn-aksi:hover { background-color: #219653; }
+        .btn-aksi:disabled { background-color: #bdc3c7; cursor: not-allowed; }
         .btn-kembali { display: block; text-align: center; margin-top: 15px; font-size: 13px; color: #7f8c8d; text-decoration: none; }
+        #box-admin-utama { display: none; }
+        #box-login-pin { display: block; }
     </style>
 </head>
 <body>
 
-    <div class="container">
+    <!-- KOTAK PIN -->
+    <div class="container" id="box-login-pin">
+        <h1>Keamanan Admin</h1>
+        <div class="form-group">
+            <label>Masukkan PIN Akses</label>
+            <input type="password" id="input-pin" placeholder="•••••" inputmode="numeric" pattern="[0-9]*" style="text-align: center; font-size: 20px; letter-spacing: 5px;">
+        </div>
+        <button type="button" class="btn-aksi" onclick="cekPin()">Masuk Panel</button>
+        <a href="index.html" class="btn-kembali">← Kembali ke Halaman Utama</a>
+    </div>
+
+    <!-- KOTAK UTAMA INPUT DATA -->
+    <div class="container" id="box-admin-utama">
         <h1>Panel Input Kas Infaq</h1>
         
         <form id="form-infaq">
@@ -42,40 +56,51 @@
                 <label>Jumlah (Angka Saja)</label>
                 <input type="number" id="form-jumlah" placeholder="Contoh: 50000" required>
             </div>
-            <div class="form-group">
-                <label>Token Akses GitHub (On-Demand Password)</label>
-                <input type="password" id="form-token" placeholder="Masukkan ghp_xxxxxxxx" required>
-            </div>
             
-            <button type="submit" class="btn-simpan">Kirim & Simpan ke GitHub</button>
-            <a href="index.html" class="btn-kembali">← Kembali ke Laporan Utama</a>
+            <button type="submit" class="btn-aksi" id="btn-submit-data">Simpan ke GitHub</button>
+            <button type="button" class="btn-kembali" onclick="logoutAdmin()" style="background: none; border: none; cursor: pointer; width: 100%;">🔒 Kunci & Keluar Panel</button>
         </form>
     </div>
 
     <script>
-        // ========================================================
-        // MASUKKAN URL LIVE WORKER CLOUDFLARE ANDA DI SINI
-        // ========================================================
+        // ISI DENGAN URL WORKER ANDA
         const URL_API_WORKER = "https://api-infaq.USERNAME_ANDA.workers.dev";
 
-        // Mengatur bawaan form tanggal otomatis hari ini
-        document.getElementById('form-tanggal').valueAsDate = new Date();
+        let pinTerverifikasi = "";
+
+        function cekPin() {
+            const pinSaran = document.getElementById('input-pin').value;
+            if (pinSaran === "234123") {
+                pinTerverifikasi = pinSaran;
+                document.getElementById('box-login-pin').style.display = 'none';
+                document.getElementById('box-admin-utama').style.display = 'block';
+                document.getElementById('form-tanggal').valueAsDate = new Date();
+            } else {
+                alert("PIN salah! Akses ditolak.");
+                document.getElementById('input-pin').value = "";
+            }
+        }
+
+        function logoutAdmin() {
+            pinTerverifikasi = "";
+            document.getElementById('input-pin').value = "";
+            document.getElementById('box-admin-utama').style.display = 'none';
+            document.getElementById('box-login-pin').style.display = 'block';
+        }
 
         document.getElementById('form-infaq').addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            const tombol = document.querySelector('.btn-simpan');
-            const teksAwal = tombol.innerText;
-            tombol.innerText = "Sedang Memproses Commit via Worker...";
+            const tombol = document.getElementById('btn-submit-data');
+            tombol.innerText = "Sedang Menyimpan...";
             tombol.disabled = true;
 
-            // Membangun data payload yang akan dikirim (Token dipanggil tepat di saat klik ini saja)
             const payload = {
                 tanggal: document.getElementById('form-tanggal').value,
                 jenis: document.getElementById('form-jenis').value,
                 keterangan: document.getElementById('form-keterangan').value,
                 jumlah: document.getElementById('form-jumlah').value,
-                token_admin: document.getElementById('form-token').value 
+                pin_admin: pinTerverifikasi
             };
 
             try {
@@ -87,17 +112,17 @@
 
                 const hasil = await respon.json();
                 if (hasil.status === "sukses") {
-                    alert("Alhamdulillah, data kas berhasil ditambahkan dan disimpan di GitHub!");
-                    // Reset input teks agar bisa input data selanjutnya tanpa reload halaman
+                    alert("Alhamdulillah, data kas berhasil disimpan!");
                     document.getElementById('form-keterangan').value = "";
                     document.getElementById('form-jumlah').value = "";
                 } else {
-                    alert("Gagal memproses data: " + hasil.pesan);
+                    alert("Gagal: " + hasil.pesan);
+                    if(hasil.pesan.includes("PIN")) logoutAdmin();
                 }
             } catch (err) {
-                alert("Gagal terhubung ke Cloudflare Worker API. Periksa setelan CORS atau URL Worker Anda.");
+                alert("Koneksi ke Worker gagal.");
             } finally {
-                tombol.innerText = teksAwal;
+                tombol.innerText = "Simpan ke GitHub";
                 tombol.disabled = false;
             }
         });
