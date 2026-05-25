@@ -42,17 +42,14 @@
             <div class="waktu-terkini" id="jam-digital">Memuat waktu...</div>
         </header>
 
-        <!-- GRID INFORMASI UTAMA -->
         <div class="grid-keuangan">
             <div class="kartu kartu-masuk"><h3>Total Infaq Masuk</h3><div class="nominal">Rp <span id="txt-masuk">0</span></div></div>
             <div class="kartu kartu-keluar"><h3>Pengeluaran Kas</h3><div class="nominal">Rp <span id="txt-keluar">0</span></div></div>
             <div class="kartu kartu-saldo"><h3>Sisa Saldo Saat Ini</h3><div class="nominal">Rp <span id="txt-saldo">0</span></div></div>
         </div>
 
-        <!-- STATUS BOX OTOMATIS -->
         <div class="status-box"><strong>Keterangan:</strong> <span id="txt-catatan">Memuat status kas...</span></div>
 
-        <!-- TABEL RINCIAN MASUK -->
         <div class="section-detail">
             <h2 class="title-masuk">Rincian Infaq Masuk</h2>
             <table>
@@ -61,7 +58,6 @@
             </table>
         </div>
 
-        <!-- TABEL RINCIAN KELUAR -->
         <div class="section-detail">
             <h2 class="title-keluar">Rincian Pengeluaran Kas</h2>
             <table>
@@ -81,7 +77,6 @@
 
         async function muatDataInfaq() {
             try {
-                // Mengambil cache-busting agar data selalu fresh dari GitHub Pages tanpa nyangkut cache browser
                 const respon = await fetch('data.json?t=' + new Date().getTime());
                 const data = await respon.json();
                 let totalMasuk = 0, totalKeluar = 0;
